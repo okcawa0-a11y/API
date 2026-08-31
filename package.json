@@ -1,7 +1,7 @@
 {
   "name": "dragon-music-api",
   "version": "1.0.0",
-  "description": "YT Music API - Dragon V1",
+  "description": "Simple YT Music API Bridge",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,9 +10,10 @@
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "compression": "^1.7.4",
-    "ytmusic-api": "^5.0.0",
-    "ytdl-core": "^4.11.5"
+    "ytmusic-api": "^5.0.0"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "author": "Dragon V1",
   "license": "Unlicense"
