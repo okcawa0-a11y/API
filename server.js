@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const compression = require('compression');
 const { YTMusic } = require('ytmusic-api');
 
 const app = express();
@@ -8,11 +7,11 @@ const port = process.env.PORT || 3000;
 const ytmusic = new YTMusic();
 
 app.use(cors({ origin: '*' }));
-app.use(compression());
 app.use(express.json());
 
 let clientReady = false;
 
+// Inisialisasi client
 async function initClient() {
   if (!clientReady) {
     await ytmusic.initialize();
@@ -21,10 +20,10 @@ async function initClient() {
   }
 }
 
-// HEALTH CHECK
+// Health check
 app.get('/', (req, res) => {
   res.json({
-    status: '🐉 Dragon Music API',
+    status: '🐉 Dragon YT Music Bridge',
     version: '1.0.0',
     client: clientReady ? 'ready' : 'initializing'
   });
@@ -35,7 +34,7 @@ app.get('/api/search', async (req, res) => {
   try {
     await initClient();
     const { q, type = 'SONG', limit = 20 } = req.query;
-    if (!q) return res.status(400).json({ error: 'Query kosong' });
+    if (!q) return res.status(400).json({ error: 'Query required' });
 
     let results = [];
     switch (type.toUpperCase()) {
@@ -61,7 +60,7 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
-// SONG DETAIL
+// SONG DETAIL + LYRICS + RELATED
 app.get('/api/song/:videoId', async (req, res) => {
   try {
     await initClient();
@@ -184,44 +183,11 @@ app.get('/api/trending', async (req, res) => {
   }
 });
 
-// STREAM (pakai ytdl-core)
-app.get('/api/stream/:videoId', async (req, res) => {
-  try {
-    const { videoId } = req.params;
-    const ytdl = require('ytdl-core');
-    const info = await ytdl.getInfo(`https://youtube.com/watch?v=${videoId}`);
-    const format = ytdl.chooseFormat(info.formats, { 
-      quality: 'highestaudio', 
-      filter: 'audioonly' 
-    });
-    res.json({ url: format.url });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// DOWNLOAD
-app.get('/api/download/:videoId', async (req, res) => {
-  try {
-    const { videoId } = req.params;
-    const ytdl = require('ytdl-core');
-    const stream = ytdl(`https://youtube.com/watch?v=${videoId}`, {
-      quality: 'highestaudio',
-      filter: 'audioonly'
-    });
-    res.setHeader('Content-Type', 'audio/webm');
-    res.setHeader('Content-Disposition', `attachment; filename="${videoId}.webm"`);
-    stream.pipe(res);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// START
+// START SERVER
 if (require.main === module) {
   app.listen(port, async () => {
     await initClient();
-    console.log(`🐉 Dragon API running on http://localhost:${port}`);
+    console.log(`🐉 Dragon YT Music Bridge running on http://localhost:${port}`);
   });
 }
 
